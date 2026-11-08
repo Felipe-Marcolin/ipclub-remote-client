@@ -41,7 +41,7 @@ jobs:
       - name: Install vcpkg dependencies
         shell: bash
         run: |
-          C:/vcpkg/vcpkg.exe install --triplet x64-windows-static libvpx libyuv opus
+          C:/vcpkg/vcpkg.exe install --triplet x64-windows-static libvpx libyuv opus libaom
           mkdir -p rustdesk/installed/x64-windows-static
           cp -r C:/vcpkg/installed/x64-windows-static/* rustdesk/installed/x64-windows-static/ || true
 
