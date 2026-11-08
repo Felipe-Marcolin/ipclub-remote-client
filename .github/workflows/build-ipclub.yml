@@ -31,12 +31,19 @@ jobs:
           grep -n "pub const RENDEZVOUS_SERVERS" "$CONFIG_FILE"
           grep -n "pub const RS_PUB_KEY" "$CONFIG_FILE"
 
-      - name: Setup Vcpkg
+      - name: Setup vcpkg
+        uses: lukka/run-vcpkg@v11
+        with:
+          vcpkgDirectory: C:/vcpkg
+          vcpkgGitCommitId: 9e593bb18ea69cc5095e012465dcd675a822ed0d
+          doNotCache: false
+
+      - name: Install vcpkg dependencies
         shell: bash
         run: |
-          echo "VCPKG_ROOT=$VCPKG_INSTALLATION_ROOT" >> $GITHUB_ENV
-          cd "$VCPKG_INSTALLATION_ROOT"
-          ./vcpkg.exe install --triplet x64-windows-static libvpx libyuv opus
+          C:/vcpkg/vcpkg.exe install --triplet x64-windows-static libvpx libyuv opus
+          mkdir -p rustdesk/installed/x64-windows-static
+          cp -r C:/vcpkg/installed/x64-windows-static/* rustdesk/installed/x64-windows-static/ || true
 
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
@@ -52,7 +59,7 @@ jobs:
       - name: Build Executable
         shell: bash
         env:
-          VCPKG_ROOT: ${{ env.VCPKG_INSTALLATION_ROOT }}
+          VCPKG_ROOT: C:/vcpkg
         run: |
           cd rustdesk
           python3 ./build.py --target x86_64-pc-windows-msvc || cargo build --release
