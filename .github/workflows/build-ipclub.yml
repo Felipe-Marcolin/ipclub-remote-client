@@ -1,0 +1,58 @@
+name: Build IPClub Remote Client (Windows x64)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    name: Build IPClub Windows x64
+    runs-on: windows-2022
+
+    steps:
+      - name: Checkout Builder
+        uses: actions/checkout@v4
+
+      - name: Checkout RustDesk Source
+        uses: actions/checkout@v4
+        with:
+          repository: rustdesk/rustdesk
+          ref: 1.3.8
+          submodules: recursive
+          path: rustdesk
+
+      - name: Inject IPClub Config
+        shell: bash
+        run: |
+          CONFIG_FILE="rustdesk/libs/hbb_common/src/config.rs"
+          sed -i 's/pub const RENDEZVOUS_SERVERS: &\[&str\] = &\[.*\];/pub const RENDEZVOUS_SERVERS: \&[\&str] = \&["remote.ipclub.com.br:21116"];/' "$CONFIG_FILE"
+          sed -i 's/pub const RS_PUB_KEY: &str = ".*";/pub const RS_PUB_KEY: \&str = "SXGk63UFmwxk1YttM0z2lQ2AvusSZBr9l4qL+4sRe00=";/' "$CONFIG_FILE"
+          grep -n "pub const RENDEZVOUS_SERVERS" "$CONFIG_FILE"
+          grep -n "pub const RS_PUB_KEY" "$CONFIG_FILE"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.5'
+          channel: 'stable'
+
+      - name: Build Executable
+        shell: bash
+        run: |
+          cd rustdesk
+          python3 ./build.py --target x86_64-pc-windows-msvc || cargo build --release
+
+      - name: Upload IPClub Remote Executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: IPClub-Remote-Windows-x64
+          path: |
+            rustdesk/target/release/rustdesk.exe
+            rustdesk/target/release/IPClub-Remote.exe
+            rustdesk/build/windows/**/*.exe
