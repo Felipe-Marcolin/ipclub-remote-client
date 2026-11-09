@@ -8,16 +8,19 @@ if os.path.exists('ipclub.ico'):
     shutil.copyfile('ipclub.ico', 'rustdesk/res/tray-icon.ico')
     print("COPIED_IPCLUB_ICO_TO_RES")
 
-# Fix inline-sciter.py to always read files with encoding='utf-8' on Windows
+# Fix inline-sciter.py to always read and write files with encoding='utf-8' on Windows
 inline_sciter_path = 'rustdesk/res/inline-sciter.py'
 if os.path.exists(inline_sciter_path):
     with open(inline_sciter_path, 'r', encoding='utf-8') as f:
         sciter_script = f.read()
-    sciter_script = sciter_script.replace("open('src/ui/index.tis').read()", "open('src/ui/index.tis', encoding='utf-8').read()")
-    sciter_script = sciter_script.replace("open('src/ui/index.css').read()", "open('src/ui/index.css', encoding='utf-8').read()")
+    
+    # Force utf-8 on all open() calls
+    sciter_script = sciter_script.replace("open('src/ui/inline.rs', 'wt')", "open('src/ui/inline.rs', 'wt', encoding='utf-8')")
+    sciter_script = re.sub(r"open\((['\"][^'\"]+['\"])\)\.read\(\)", r"open(\1, encoding='utf-8').read()", sciter_script)
+    
     with open(inline_sciter_path, 'w', encoding='utf-8') as f:
         f.write(sciter_script)
-    print("FIXED_INLINE_SCITER_ENCODING")
+    print("FIXED_INLINE_SCITER_ENCODING_COMPREHENSIVE")
 
 with open('ipclub_logo_128_b64.txt', 'r', encoding='utf-8') as f:
     logo_b64 = f.read().strip()
@@ -103,9 +106,9 @@ print("UPDATED_INDEX_CSS")
 with open('rustdesk/src/ui/index.tis', 'r', encoding='utf-8') as f:
     index_tis = f.read()
 
-# Replace InstallMe text
+# Replace InstallMe text using safe HTML entities so Sciter renders UTF-8 flawlessly on any OS
 install_me_old = "<div>{translate('install_tip')}</div>"
-install_me_new = "<div><strong>Permissão de Administrador (UAC):</strong><br/>Para que o suporte técnico da IPClub responda às confirmações do Windows e instale programas sem travar a tela, clique no botão abaixo:</div>"
+install_me_new = "<div><strong>Permiss&#xe3;o de Administrador (UAC):</strong><br/>Para que o suporte t&#xe9;cnico da IPClub responda &#xe0;s confirma&#xe7;&#xf5;es do Windows e instale programas sem travar a tela, clique no bot&#xe3;o abaixo:</div>"
 if install_me_old in index_tis:
     index_tis = index_tis.replace(install_me_old, install_me_new)
     print("REPLACED_INSTALL_ME_TEXT")
@@ -129,7 +132,7 @@ if re.search(left_pane_regex, index_tis):
 else:
     print("WARNING: left-pane not found!")
 
-# Replace ConnectStatus footer with clickable links
+# Replace ConnectStatus footer with safe ASCII / HTML-entities
 status_code = """    function getConnectStatusStr() {
         if (service_stopped) {
             return translate("Service is not running");
@@ -138,7 +141,7 @@ status_code = """    function getConnectStatusStr() {
         } else if (connect_status == 0) {
             return translate('connecting_status');
         }
-        return <span>{translate("Ready")} | <span .footer-link #link-site>🌐 ipclub.com.br</span> | <span .footer-link #link-zap>💬 0800 305 7300</span> | <span .footer-link #link-planos>⭐ Planos</span></span>;
+        return <span>{translate("Ready")} | <span .footer-link #link-site>ipclub.com.br</span> | <span .footer-link #link-zap>WhatsApp: 0800 305 7300</span> | <span .footer-link #link-planos>Planos</span></span>;
     }
 
     event click $(#link-site) () {
