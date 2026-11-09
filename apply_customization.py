@@ -29,6 +29,7 @@ with open('rustdesk/src/ui.rs', 'r', encoding='utf-8') as f:
 new_ui_code = re.sub(r'\"data:image/png;base64,[A-Za-z0-9+/=]+\"\.into\(\)', f'\"data:image/png;base64,{logo_b64}\".into()', ui_code)
 with open('rustdesk/src/ui.rs', 'w', encoding='utf-8') as f:
     f.write(new_ui_code)
+print("UPDATED_UI_RS_ICON")
 
 # 2. Update index.css
 with open('rustdesk/src/ui/index.css', 'r', encoding='utf-8') as f:
@@ -96,6 +97,7 @@ div.connect-status a.footer-link:hover, div.connect-status span.footer-link:hove
 index_css += custom_css
 with open('rustdesk/src/ui/index.css', 'w', encoding='utf-8') as f:
     f.write(index_css)
+print("UPDATED_INDEX_CSS")
 
 # 3. Update index.tis
 with open('rustdesk/src/ui/index.tis', 'r', encoding='utf-8') as f:
@@ -103,9 +105,12 @@ with open('rustdesk/src/ui/index.tis', 'r', encoding='utf-8') as f:
 
 # Replace InstallMe text
 install_me_old = "<div>{translate('install_tip')}</div>"
-install_me_new = "<div><strong>Permissão de Administrador (UAC):</strong><br/>Para que o suporte técnico da IPClub responda às confirmações do Windows e instale programas sem travar a tela, clique abaixo:</div>"
+install_me_new = "<div><strong>Permissão de Administrador (UAC):</strong><br/>Para que o suporte técnico da IPClub responda às confirmações do Windows e instale programas sem travar a tela, clique no botão abaixo:</div>"
 if install_me_old in index_tis:
     index_tis = index_tis.replace(install_me_old, install_me_new)
+    print("REPLACED_INSTALL_ME_TEXT")
+else:
+    print("WARNING: install_me_old not found!")
 
 # Add Top Logo
 logo_html = f'''<div .ipclub-top-logo>
@@ -116,7 +121,13 @@ logo_html = f'''<div .ipclub-top-logo>
                         </div>
                     </div>'''
 
-index_tis = index_tis.replace("<div .left-pane>", f"<div .left-pane>\n                    {logo_html}")
+# Match <div .left-pane ...>
+left_pane_regex = r'(<div \.left-pane[^>]*>)'
+if re.search(left_pane_regex, index_tis):
+    index_tis = re.sub(left_pane_regex, r'\1\n                    ' + logo_html, index_tis, count=1)
+    print("INJECTED_TOP_LOGO")
+else:
+    print("WARNING: left-pane not found!")
 
 # Replace ConnectStatus footer with clickable links
 status_code = """    function getConnectStatusStr() {
@@ -140,12 +151,28 @@ status_code = """    function getConnectStatusStr() {
 
     event click $(#link-planos) () {
         handler.open_url("https://remote.ipclub.com.br/planos");
-    }"""
+    }
+}"""
 
-old_status_regex = r"function getConnectStatusStr\(\) \{[\s\S]*?event click \$\(#setup-server\) \(\) \{[\s\S]*?\}"
-index_tis = re.sub(old_status_regex, status_code, index_tis)
+old_status_regex = r'function getConnectStatusStr\(\) \{[\s\S]*?event click \$\(#setup-server\) \(\) \{[\s\S]*?\}\r?\n\}'
+if re.search(old_status_regex, index_tis):
+    index_tis = re.sub(old_status_regex, status_code, index_tis, count=1)
+    print("REPLACED_FOOTER_STATUS")
+else:
+    print("WARNING: old_status_regex not matched!")
 
 with open('rustdesk/src/ui/index.tis', 'w', encoding='utf-8') as f:
     f.write(index_tis)
+
+# 4. Also update Portuguese translation in rustdesk/src/lang/pt_BR.rs
+pt_lang_path = 'rustdesk/src/lang/pt_BR.rs'
+if os.path.exists(pt_lang_path):
+    with open(pt_lang_path, 'r', encoding='utf-8') as f:
+        pt_content = f.read()
+    pt_content = pt_content.replace('RustDesk', 'IPClub Remote')
+    pt_content = pt_content.replace('rustdesk.com', 'ipclub.com.br')
+    with open(pt_lang_path, 'w', encoding='utf-8') as f:
+        f.write(pt_content)
+    print("UPDATED_PT_BR_LANG")
 
 print("ALL_CUSTOMIZATIONS_SUCCESS")
