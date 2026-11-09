@@ -1,14 +1,23 @@
-﻿import os
+import os
 import shutil
 import re
-# Copy ipclub.ico to rustdesk resources
 
+# 0. Copy ipclub.ico to rustdesk resources
 if os.path.exists('ipclub.ico'):
     shutil.copyfile('ipclub.ico', 'rustdesk/res/icon.ico')
     shutil.copyfile('ipclub.ico', 'rustdesk/res/tray-icon.ico')
     print("COPIED_IPCLUB_ICO_TO_RES")
 
-
+# Fix inline-sciter.py to always read files with encoding='utf-8' on Windows
+inline_sciter_path = 'rustdesk/res/inline-sciter.py'
+if os.path.exists(inline_sciter_path):
+    with open(inline_sciter_path, 'r', encoding='utf-8') as f:
+        sciter_script = f.read()
+    sciter_script = sciter_script.replace("open('src/ui/index.tis').read()", "open('src/ui/index.tis', encoding='utf-8').read()")
+    sciter_script = sciter_script.replace("open('src/ui/index.css').read()", "open('src/ui/index.css', encoding='utf-8').read()")
+    with open(inline_sciter_path, 'w', encoding='utf-8') as f:
+        f.write(sciter_script)
+    print("FIXED_INLINE_SCITER_ENCODING")
 
 with open('ipclub_logo_128_b64.txt', 'r', encoding='utf-8') as f:
     logo_b64 = f.read().strip()
@@ -94,7 +103,7 @@ with open('rustdesk/src/ui/index.tis', 'r', encoding='utf-8') as f:
 
 # Replace InstallMe text
 install_me_old = "<div>{translate('install_tip')}</div>"
-install_me_new = "<div><strong>PermissÃ£o de Administrador (UAC):</strong><br/>Para que o suporte tÃ©cnico da IPClub responda Ã s confirmaÃ§Ãµes do Windows e instale programas sem travar a tela, clique abaixo:</div>"
+install_me_new = "<div><strong>Permissão de Administrador (UAC):</strong><br/>Para que o suporte técnico da IPClub responda às confirmações do Windows e instale programas sem travar a tela, clique abaixo:</div>"
 if install_me_old in index_tis:
     index_tis = index_tis.replace(install_me_old, install_me_new)
 
@@ -118,7 +127,7 @@ status_code = """    function getConnectStatusStr() {
         } else if (connect_status == 0) {
             return translate('connecting_status');
         }
-        return <span>{translate("Ready")} | <span .footer-link #link-site>ðŸŒ ipclub.com.br</span> | <span .footer-link #link-zap>ðŸ’¬ 0800 305 7300</span> | <span .footer-link #link-planos>â­ Planos</span></span>;
+        return <span>{translate("Ready")} | <span .footer-link #link-site>🌐 ipclub.com.br</span> | <span .footer-link #link-zap>💬 0800 305 7300</span> | <span .footer-link #link-planos>⭐ Planos</span></span>;
     }
 
     event click $(#link-site) () {
@@ -133,7 +142,6 @@ status_code = """    function getConnectStatusStr() {
         handler.open_url("https://remote.ipclub.com.br/planos");
     }"""
 
-# Replace existing getConnectStatusStr
 old_status_regex = r"function getConnectStatusStr\(\) \{[\s\S]*?event click \$\(#setup-server\) \(\) \{[\s\S]*?\}"
 index_tis = re.sub(old_status_regex, status_code, index_tis)
 
@@ -141,5 +149,3 @@ with open('rustdesk/src/ui/index.tis', 'w', encoding='utf-8') as f:
     f.write(index_tis)
 
 print("ALL_CUSTOMIZATIONS_SUCCESS")
-
-
