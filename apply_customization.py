@@ -1,3 +1,9 @@
+﻿# Copy ipclub.ico to rustdesk resources
+import shutil
+if os.path.exists('ipclub.ico'):
+    shutil.copyfile('ipclub.ico', 'rustdesk/res/icon.ico')
+    shutil.copyfile('ipclub.ico', 'rustdesk/res/tray-icon.ico')
+    print("COPIED_IPCLUB_ICO_TO_RES")
 import re
 import os
 
@@ -85,7 +91,7 @@ with open('rustdesk/src/ui/index.tis', 'r', encoding='utf-8') as f:
 
 # Replace InstallMe text
 install_me_old = "<div>{translate('install_tip')}</div>"
-install_me_new = "<div><strong>Permissão de Administrador (UAC):</strong><br/>Para que o suporte técnico da IPClub responda às confirmações do Windows e instale programas sem travar a tela, clique abaixo:</div>"
+install_me_new = "<div><strong>PermissÃ£o de Administrador (UAC):</strong><br/>Para que o suporte tÃ©cnico da IPClub responda Ã s confirmaÃ§Ãµes do Windows e instale programas sem travar a tela, clique abaixo:</div>"
 if install_me_old in index_tis:
     index_tis = index_tis.replace(install_me_old, install_me_new)
 
@@ -109,7 +115,7 @@ status_code = """    function getConnectStatusStr() {
         } else if (connect_status == 0) {
             return translate('connecting_status');
         }
-        return <span>{translate("Ready")} | <span .footer-link #link-site>🌐 ipclub.com.br</span> | <span .footer-link #link-zap>💬 0800 305 7300</span> | <span .footer-link #link-planos>⭐ Planos</span></span>;
+        return <span>{translate("Ready")} | <span .footer-link #link-site>ðŸŒ ipclub.com.br</span> | <span .footer-link #link-zap>ðŸ’¬ 0800 305 7300</span> | <span .footer-link #link-planos>â­ Planos</span></span>;
     }
 
     event click $(#link-site) () {
@@ -132,3 +138,4 @@ with open('rustdesk/src/ui/index.tis', 'w', encoding='utf-8') as f:
     f.write(index_tis)
 
 print("ALL_CUSTOMIZATIONS_SUCCESS")
+
