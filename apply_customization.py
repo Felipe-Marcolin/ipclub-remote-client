@@ -1,11 +1,14 @@
-﻿# Copy ipclub.ico to rustdesk resources
+﻿import os
 import shutil
+import re
+# Copy ipclub.ico to rustdesk resources
+
 if os.path.exists('ipclub.ico'):
     shutil.copyfile('ipclub.ico', 'rustdesk/res/icon.ico')
     shutil.copyfile('ipclub.ico', 'rustdesk/res/tray-icon.ico')
     print("COPIED_IPCLUB_ICO_TO_RES")
-import re
-import os
+
+
 
 with open('ipclub_logo_128_b64.txt', 'r', encoding='utf-8') as f:
     logo_b64 = f.read().strip()
@@ -138,4 +141,5 @@ with open('rustdesk/src/ui/index.tis', 'w', encoding='utf-8') as f:
     f.write(index_tis)
 
 print("ALL_CUSTOMIZATIONS_SUCCESS")
+
 
