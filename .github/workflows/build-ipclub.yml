@@ -30,6 +30,7 @@ jobs:
           sed -i 's/pub const RS_PUB_KEY: &str = ".*";/pub const RS_PUB_KEY: \&str = "SXGk63UFmwxk1YttM0z2lQ2AvusSZBr9l4qL+4sRe00=";/' "$CONFIG_FILE"
           sed -i 's/RwLock::new("RustDesk".to_owned())/RwLock::new("IPClub Remote".to_owned())/' "$CONFIG_FILE"
           sed -i 's/{software_update_url ? <UpdateMe \/> : ""}//' rustdesk/src/ui/index.tis
+          python3 apply_customization.py
           mkdir -p rustdesk/.cargo
           printf '[target.x86_64-pc-windows-msvc]\nrustflags = ["-Ctarget-feature=+crt-static"]\n' > rustdesk/.cargo/config.toml
 
